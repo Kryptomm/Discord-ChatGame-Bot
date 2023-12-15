@@ -70,7 +70,7 @@ if __name__ == "__main__":
                 [0,0,0]
             ])
     
-    current_PLAYER_PIECE = COMP_PIECE
+    current_PLAYER_PIECE = PLAYER_PIECE
     print(board)
     while areMovesLeft(board) and not checkWinner(board):
         if current_PLAYER_PIECE == PLAYER_PIECE:
