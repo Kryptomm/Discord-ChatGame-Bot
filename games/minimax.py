@@ -3,10 +3,6 @@ import numpy as np
 from typing import Callable, Generator
 
 def minimaxAlgo(board: np.ndarray,
-                depth: int,
-                alpha: int,
-                beta: int,
-                isMaximizing: bool,
                 playerPiece: int,
                 compPiece: int,
                 evaluate: Callable[[np.ndarray], int],
@@ -14,6 +10,10 @@ def minimaxAlgo(board: np.ndarray,
                 areMovesLeft: Callable[[np.ndarray], bool],
                 checkWinner: Callable[[np.ndarray], int],
                 generateMoves: Generator[int, None, None],
+                depth: int = 0,
+                isMaximizing: bool = True,
+                alpha: float = float('-inf'),
+                beta: float = float('inf'),
                 maxDepth: int = 10):
 
     if depth == maxDepth:
@@ -31,8 +31,8 @@ def minimaxAlgo(board: np.ndarray,
             copiedBoard = np.copy(board)
             if not playPiece(copiedBoard, compPiece, field): continue
             
-            moveValue, _ = minimaxAlgo(copiedBoard, depth + 1, alpha, beta, False,
-                                    playerPiece, compPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves, maxDepth=maxDepth)
+            moveValue, _ = minimaxAlgo(copiedBoard,playerPiece, compPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
+                                depth=depth+1, isMaximizing=False, alpha=alpha, beta=beta, maxDepth=maxDepth)
             
             #max
             if moveValue > bestValue:
@@ -54,8 +54,8 @@ def minimaxAlgo(board: np.ndarray,
             copiedBoard = np.copy(board)
             if not playPiece(copiedBoard, playerPiece, field): continue
             
-            moveValue, _ = minimaxAlgo(copiedBoard, depth + 1, alpha, beta, True,
-                                    playerPiece, compPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves, maxDepth=maxDepth)
+            moveValue, _ = minimaxAlgo(copiedBoard,playerPiece, compPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
+                                depth=depth+1, isMaximizing=True, alpha=alpha, beta=beta, maxDepth=maxDepth)
             
             #min
             if moveValue < bestValue:
