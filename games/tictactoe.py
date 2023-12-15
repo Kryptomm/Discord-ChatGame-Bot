@@ -1,10 +1,9 @@
 import numpy as np
 
+import minimax
 
-
-
-PLAYER_ONE = 1
-PLAYER_TWO = 2
+PLAYER_PIECE = 1
+COMP_PIECE = 2
 
 """
 Board is classicly build like this:
@@ -15,14 +14,14 @@ Board is classicly build like this:
     ] as a numpy matrix
     Where
         0 is a free space
-        1 is Player_One
-        2 is Player_Two
+        1 is PLAYER_PIECE
+        2 is COMP_PIECE
 """
 
 def areMovesLeft(board: np.ndarray) -> bool:
     return np.any(board == 0)
 
-def checkWinner(board: np.ndarray) -> bool:
+def checkWinner(board: np.ndarray) -> int:
     for i in range(3):
         #Check Rows
         if np.all(board[i] == board[i][0]):
@@ -40,6 +39,10 @@ def checkWinner(board: np.ndarray) -> bool:
     #No winner
     return 0
 
+def generateMoves():
+    for i in range(9):
+        yield i
+
 def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
     y = field // 3
     x = field % 3
@@ -49,6 +52,17 @@ def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
     board[y][x] = piece
     return True
 
+def evaluateBoard(board: np.ndarray) -> int:
+    winner = checkWinner(board)
+    if winner == PLAYER_PIECE: return -1
+    elif winner == COMP_PIECE: return 1
+    else: return 0
+
+def findBestMove(board: np.ndarray) -> int:
+    copiedBoard = np.copy(board)
+    return minimax.minimaxAlgo(copiedBoard, 0, float('-inf'), float('inf'), True, PLAYER_PIECE, COMP_PIECE,
+                                            evaluateBoard, playPiece, areMovesLeft, checkWinner, generateMoves, maxDepth=20)[1]
+
 if __name__ == "__main__":
     board = np.array([
                 [0,0,0],
@@ -56,16 +70,21 @@ if __name__ == "__main__":
                 [0,0,0]
             ])
     
-    current_player = PLAYER_ONE
+    current_PLAYER_PIECE = COMP_PIECE
+    print(board)
     while areMovesLeft(board) and not checkWinner(board):
-        print(board)
-        
-        target_field = int(input("field: "))
-        while(not playPiece(board, current_player, target_field)):
-            target_field = int(input("NEU field: "))
+        if current_PLAYER_PIECE == PLAYER_PIECE:
+            target_field = int(input("field: "))
+            while(not playPiece(board, PLAYER_PIECE, target_field)):
+                target_field = int(input("NEU field: "))
+        else:
+            move = findBestMove(board)
+            playPiece(board, COMP_PIECE, move)
             
-        if current_player == PLAYER_ONE: current_player = PLAYER_TWO
-        else: current_player = PLAYER_ONE
+        print(board)
+            
+        if current_PLAYER_PIECE == PLAYER_PIECE: current_PLAYER_PIECE = COMP_PIECE
+        else: current_PLAYER_PIECE = PLAYER_PIECE
         
     if not checkWinner(board):
         print("Unentschieden")
