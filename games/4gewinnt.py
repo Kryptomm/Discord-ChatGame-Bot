@@ -1,16 +1,20 @@
 import numpy as np
 import minimax
 
+
 PLAYER_PIECE = 1
 COMP_PIECE = 2
 
 """
 Board is classicly build like this:
     [
-        [0,2,0],
-        [1,0,1],
-        [1,2,2]
-    ] as a numpy matrix (3x3)
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+        [0,0,2,0,0,2,0],
+        [0,1,2,1,0,1,0],
+        [1,1,2,2,1,2,1],
+    ] as a numpy matrix (7x6)
     Where
         0 is a free space
         1 is PLAYER_PIECE
@@ -23,7 +27,7 @@ def generateMoves():
     Yields:
         int: the move
     """    
-    for i in range(9):
+    for i in range(7):
         yield i
 
 def areMovesLeft(board: np.ndarray) -> bool:
@@ -46,21 +50,28 @@ def checkWinner(board: np.ndarray) -> int:
     Returns:
         int: the winner
     """    
-    for i in range(3):
-        #Check Rows
-        if np.all(board[i] == board[i][0]):
-            return board[i][0]
-        #Check Columns
-        if np.all(board[:,i] == board[:,i][0]):
-            return board[:,i][0]
+    for row in range(6):
+        row_str = ''.join(map(str, board[row]))
+        if str(PLAYER_PIECE)*4 in row_str: return PLAYER_PIECE
+        elif str(COMP_PIECE)*4 in row_str: return COMP_PIECE
+
+    for column in range(6):
+        column_str = ''.join(map(str, board[:,column]))
+        if str(PLAYER_PIECE)*4 in column_str: return PLAYER_PIECE
+        elif str(COMP_PIECE)*4 in column_str: return COMP_PIECE
+
+    for diagRow in range(3):
+        for diagCol in range(4):
+            square = board[:,diagCol:diagCol+4][diagRow:diagRow+4]
     
-    #Check diagonals
-    if np.all(board.diagonal() == board.diagonal()[0]):
-        return board.diagonal()[0]
-    if np.all(np.flipud(board).diagonal() == np.flipud(board).diagonal()[0]):
-        return np.flipud(board).diagonal()[0]
-    
-    #No winner
+            if (np.all(square.diagonal() == square.diagonal()[0])
+                    and square.diagonal()[0] in [PLAYER_PIECE, COMP_PIECE]):
+                return square.diagonal()[0]
+            
+            if (np.all(np.flipud(square).diagonal() == np.flipud(square).diagonal()[0])
+                    and np.flipud(square).diagonal()[0] in [PLAYER_PIECE, COMP_PIECE]):
+                return np.flipud(square).diagonal()[0]
+
     return 0
 
 def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
@@ -74,12 +85,13 @@ def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
     Returns:
         bool: true if the piece is placed or not
     """
-    y = field // 3
-    x = field % 3
-    
-    if board[y][x]: return False
-    
-    board[y][x] = piece
+    column = board[:,field]
+
+    openRow = np.where(column == 0)[0]
+    if len(openRow) == 0: return False
+    openRow = max(openRow)
+
+    board[openRow,field] = piece
     return True
 
 def evaluateBoard(board: np.ndarray) -> int:
@@ -92,8 +104,8 @@ def evaluateBoard(board: np.ndarray) -> int:
         int: the score of the board
     """
     winner = checkWinner(board)
-    if winner == PLAYER_PIECE: return -1
-    elif winner == COMP_PIECE: return 1
+    if winner == PLAYER_PIECE: return float('-inf')
+    elif winner == COMP_PIECE: return float('inf')
     else: return 0
 
 def findBestMove(board: np.ndarray) -> int:
@@ -107,15 +119,21 @@ def findBestMove(board: np.ndarray) -> int:
     """
     copiedBoard = np.copy(board)
     return minimax.minimaxAlgo(copiedBoard, PLAYER_PIECE, COMP_PIECE,
-                                evaluateBoard, playPiece, areMovesLeft, checkWinner, generateMoves)
+                                evaluateBoard, playPiece, areMovesLeft, checkWinner, generateMoves,
+                                maxDepth=8, pruning=True, countEvals=True)
 
 if __name__ == "__main__":
     board = np.array([
-                [0,0,0],
-                [0,0,0],
-                [0,0,0]
+                [0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0],
             ])
     
+    findBestMove(board)
+    exit()
     current_PLAYER_PIECE = PLAYER_PIECE
     print(board)
     while areMovesLeft(board) and not checkWinner(board):
@@ -125,6 +143,7 @@ if __name__ == "__main__":
                 target_field = int(input("NEU field: "))
         else:
             move = findBestMove(board)
+            print("AI:",move)
             playPiece(board, COMP_PIECE, move)
             
         print(board)

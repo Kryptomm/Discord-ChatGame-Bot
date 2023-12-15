@@ -1,6 +1,20 @@
 import numpy as np
+import time
 
 from typing import Callable, Generator
+from functools import wraps
+
+EVALS = 0
+
+def timing_decorator(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"{func.__name__} took {execution_time} seconds to execute")
+        return result
+    return wrapper
 
 def __minimaxAlgo(board: np.ndarray,
                 minimizingPiece: int,
@@ -14,7 +28,9 @@ def __minimaxAlgo(board: np.ndarray,
                 isMaximizing: bool = True,
                 alpha: float = float('-inf'),
                 beta: float = float('inf'),
-                maxDepth: int = 10):
+                maxDepth: int = 10,
+                pruning: bool = True,
+                countEvals: bool = False):
     """Finds the best move for a given game
 
     Args:
@@ -31,12 +47,17 @@ def __minimaxAlgo(board: np.ndarray,
         alpha (float, optional): alpha value. Defaults to float('-inf').
         beta (float, optional): beta value. Defaults to float('inf').
         maxDepth (int, optional): max depth to search since search could be infinite. Defaults to 10.
+        pruning (bool, optional): is pruning turned on
+        countEvals (bool, optional): counts the amount of evaluations
 
     Returns:
         [int, int]: (maxValue, bestMove) the best move that is also contained in the generateMoves function since it has to be generated from it
     """
 
     if depth == maxDepth or (not areMovesLeft(board)) or checkWinner(board):
+        if countEvals:
+            global EVALS
+            EVALS += 1
         return evaluate(board), None
     
     if isMaximizing:
@@ -48,7 +69,7 @@ def __minimaxAlgo(board: np.ndarray,
             if not playPiece(copiedBoard, maximizingPiece, field): continue
             
             moveValue, _ = __minimaxAlgo(copiedBoard,minimizingPiece, maximizingPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
-                                depth=depth+1, isMaximizing=False, alpha=alpha, beta=beta, maxDepth=maxDepth)
+                                depth=depth+1, isMaximizing=False, alpha=alpha, beta=beta, maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)
             
             #max
             if moveValue > bestValue:
@@ -57,6 +78,7 @@ def __minimaxAlgo(board: np.ndarray,
                 
             alpha = max(alpha, bestValue)
 
+            if not pruning: continue
             if beta <= alpha:
                 break
             
@@ -71,7 +93,7 @@ def __minimaxAlgo(board: np.ndarray,
             if not playPiece(copiedBoard, minimizingPiece, field): continue
             
             moveValue, _ = __minimaxAlgo(copiedBoard,minimizingPiece, maximizingPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
-                                depth=depth+1, isMaximizing=True, alpha=alpha, beta=beta, maxDepth=maxDepth)
+                                depth=depth+1, isMaximizing=True, alpha=alpha, beta=beta, maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)
             
             #min
             if moveValue < bestValue:
@@ -79,11 +101,13 @@ def __minimaxAlgo(board: np.ndarray,
                 bestMove = field
             beta = min(beta, bestValue)
 
+            if not pruning: continue
             if beta <= alpha:
                 break
         
         return bestValue, bestMove
-    
+
+@timing_decorator
 def minimaxAlgo(board: np.ndarray,
                 minimizingPiece: int,
                 maximizingPiece: int,
@@ -92,7 +116,9 @@ def minimaxAlgo(board: np.ndarray,
                 areMovesLeft: Callable[[np.ndarray], bool],
                 checkWinner: Callable[[np.ndarray], int],
                 generateMoves: Generator[int, None, None],
-                maxDepth: int = 10):
+                maxDepth: int = 10,
+                pruning: bool = True,
+                countEvals: bool = False):
     """Finds the best move for a given game
 
     Args:
@@ -105,10 +131,20 @@ def minimaxAlgo(board: np.ndarray,
         checkWinner (Callable[[np.ndarray], int]): a function that returns the winner of a game
         generateMoves (Generator[int, None, None]): a function that returns every possible move, even if it is not possible (tictactoe: 0-8)
         maxDepth (int, optional): max depth to search since search could be infinite. Defaults to 10.
+        pruning (bool, optional): is pruning turned on
+        countEvals (bool, optional): counts the amount of evaluations
 
     Returns:
         int: the best move that is also contained in the generateMoves function since it has to be generated from it
     """
     
-    return __minimaxAlgo(board, minimizingPiece, maximizingPiece,
-                                evaluate, playPiece, areMovesLeft, checkWinner, generateMoves, maxDepth=maxDepth)[1]
+    move = __minimaxAlgo(board, minimizingPiece, maximizingPiece,
+                                evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
+                                maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)[1]
+    
+    if countEvals:
+        global EVALS
+        print(f"It took {EVALS} evaulations to compute")
+        EVALS = 0
+
+    return move
