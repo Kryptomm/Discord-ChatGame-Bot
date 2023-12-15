@@ -61,7 +61,7 @@ def evaluateBoard(board: np.ndarray) -> int:
 def findBestMove(board: np.ndarray) -> int:
     copiedBoard = np.copy(board)
     return minimax.minimaxAlgo(copiedBoard, PLAYER_PIECE, COMP_PIECE,
-                                evaluateBoard, playPiece, areMovesLeft, checkWinner, generateMoves, maxDepth=10)[1]
+                                evaluateBoard, playPiece, areMovesLeft, checkWinner, generateMoves)
 
 if __name__ == "__main__":
     board = np.array([
