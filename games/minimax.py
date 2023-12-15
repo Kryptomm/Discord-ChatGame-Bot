@@ -33,7 +33,7 @@ def minimaxAlgo(board: np.ndarray,
         maxDepth (int, optional): max depth to search since search could be infinite. Defaults to 10.
 
     Returns:
-        _type_: returns the best value that is also contained in the generateMoves function since it has to be generated from it
+        [int, int]: (maxValue, bestMove) the best move that is also contained in the generateMoves function since it has to be generated from it
     """
 
     if depth == maxDepth:
