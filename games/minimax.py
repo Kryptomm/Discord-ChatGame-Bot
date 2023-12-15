@@ -1,6 +1,6 @@
 import numpy as np
 
-from typing import Callable
+from typing import Callable, Generator
 
 def minimaxAlgo(board: np.ndarray,
                 depth: int,
@@ -13,7 +13,7 @@ def minimaxAlgo(board: np.ndarray,
                 playPiece: Callable[[np.ndarray, int, int], bool],
                 areMovesLeft: Callable[[np.ndarray], bool],
                 checkWinner: Callable[[np.ndarray], int],
-                generateMoves,
+                generateMoves: Generator[int, None, None],
                 maxDepth: int = 10):
 
     if depth == maxDepth:
