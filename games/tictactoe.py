@@ -19,9 +19,25 @@ Board is classicly build like this:
 """
 
 def areMovesLeft(board: np.ndarray) -> bool:
+    """determines if there is a move left to be played
+
+    Args:
+        board (np.ndarray): the current game state
+
+    Returns:
+        bool: if there is a possible move left
+    """    
     return np.any(board == 0)
 
 def checkWinner(board: np.ndarray) -> int:
+    """checks if there is a winner and returns him
+
+    Args:
+        board (np.ndarray): the current game state
+
+    Returns:
+        int: the winner
+    """    
     for i in range(3):
         #Check Rows
         if np.all(board[i] == board[i][0]):
@@ -40,10 +56,25 @@ def checkWinner(board: np.ndarray) -> int:
     return 0
 
 def generateMoves():
+    """generates all moves that could be made, even the ones that are not possible
+
+    Yields:
+        int: the move
+    """    
     for i in range(9):
         yield i
 
 def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
+    """places a piece on the board if possible
+
+    Args:
+        board (np.ndarray): the current game state
+        piece (int): the piece needed to be placed
+        field (int): the field the where the piece is placed
+
+    Returns:
+        bool: true if the piece is placed or not
+    """
     y = field // 3
     x = field % 3
     
@@ -53,12 +84,28 @@ def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
     return True
 
 def evaluateBoard(board: np.ndarray) -> int:
+    """returns a score for the given board
+
+    Args:
+        board (np.ndarray): the current game state
+
+    Returns:
+        int: the score of the board
+    """
     winner = checkWinner(board)
     if winner == PLAYER_PIECE: return -1
     elif winner == COMP_PIECE: return 1
     else: return 0
 
 def findBestMove(board: np.ndarray) -> int:
+    """returns the current best move
+
+    Args:
+        board (np.ndarray): the current game state
+
+    Returns:
+        int: the move that needs to be played
+    """
     copiedBoard = np.copy(board)
     return minimax.minimaxAlgo(copiedBoard, PLAYER_PIECE, COMP_PIECE,
                                 evaluateBoard, playPiece, areMovesLeft, checkWinner, generateMoves)
