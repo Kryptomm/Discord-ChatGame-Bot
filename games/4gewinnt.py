@@ -1,6 +1,8 @@
 import numpy as np
 import minimax
 
+from typing import Generator
+
 
 PLAYER_PIECE = 1
 COMP_PIECE = 2
@@ -14,6 +16,7 @@ Board is classicly build like this:
         [0,0,2,0,0,2,0],
         [0,1,2,1,0,1,0],
         [1,1,2,2,1,2,1],
+        0 1 2 3 4 5 6
     ] as a numpy matrix (7x6)
     Where
         0 is a free space
@@ -21,7 +24,7 @@ Board is classicly build like this:
         2 is COMP_PIECE
 """
 
-def generateMoves():
+def generateMoves() -> Generator[int, None, None]:
     """generates all moves that could be made, even the ones that are not possible
 
     Yields:
@@ -52,26 +55,27 @@ def checkWinner(board: np.ndarray) -> int:
     """    
     for row in range(6):
         row_str = ''.join(map(str, board[row]))
-        if str(PLAYER_PIECE)*4 in row_str: return PLAYER_PIECE
-        elif str(COMP_PIECE)*4 in row_str: return COMP_PIECE
+        if '1111' in row_str: return PLAYER_PIECE
+        elif '2222' in row_str: return COMP_PIECE
 
     for column in range(6):
         column_str = ''.join(map(str, board[:,column]))
-        if str(PLAYER_PIECE)*4 in column_str: return PLAYER_PIECE
-        elif str(COMP_PIECE)*4 in column_str: return COMP_PIECE
+        if '1111' in column_str: return PLAYER_PIECE
+        elif '2222' in column_str: return COMP_PIECE
 
     for diagRow in range(3):
         for diagCol in range(4):
             square = board[:,diagCol:diagCol+4][diagRow:diagRow+4]
-    
-            if (np.all(square.diagonal() == square.diagonal()[0])
-                    and square.diagonal()[0] in [PLAYER_PIECE, COMP_PIECE]):
-                return square.diagonal()[0]
-            
-            if (np.all(np.flipud(square).diagonal() == np.flipud(square).diagonal()[0])
-                    and np.flipud(square).diagonal()[0] in [PLAYER_PIECE, COMP_PIECE]):
-                return np.flipud(square).diagonal()[0]
+            leftdiag_str = ''.join(map(str,square.diagonal()))
+            rightdiag_str = ''.join(map(str,np.flipud(square).diagonal()))
 
+            if '1111' == leftdiag_str: return PLAYER_PIECE
+            if '1111' == rightdiag_str: return PLAYER_PIECE
+            if '2222' == leftdiag_str: return COMP_PIECE
+            if '2222' == rightdiag_str: return COMP_PIECE
+
+    return 0
+    
 def playPiece(board: np.ndarray, piece: int, field: int) -> tuple[bool, tuple[int, int]]:
     """places a piece on the board if possible
 
@@ -104,7 +108,60 @@ def evaluateBoard(board: np.ndarray) -> int:
     winner = checkWinner(board)
     if winner == PLAYER_PIECE: return -10000000000
     elif winner == COMP_PIECE: return 10000000000
-    else: return 0
+
+    score = 0
+
+    #Middle Control
+    for row in [2,3,4]:
+        score += np.count_nonzero(board[:,row] == COMP_PIECE)
+
+    #Rows
+    for row in range(6):
+        row_str = ''.join(map(str, board[row]))
+        if '1110' in row_str: score -= 100
+        if '1101' in row_str: score -= 100
+        if '1011' in row_str: score -= 100
+        if '0111' in row_str: score -= 100
+
+        if '0222' in row_str: score += 100
+        if '2022' in row_str: score += 100
+        if '2202' in row_str: score += 100
+        if '2220' in row_str: score += 100
+
+    #Columns
+    for column in range(6):
+        column_str = ''.join(map(str, board[:,column]))
+        if '0111' in column_str: score -= 100
+        if '0222' in column_str: score += 100
+
+    #Diagonal
+    for diagRow in range(3):
+        for diagCol in range(4):
+            square = board[:,diagCol:diagCol+4][diagRow:diagRow+4]
+            leftdiag_str = ''.join(map(str,square.diagonal()))
+            rightdiag_str = ''.join(map(str,np.flipud(square).diagonal()))
+    
+            if '1110' == leftdiag_str: score -= 100
+            if '1101' == leftdiag_str: score -= 100
+            if '1011' == leftdiag_str: score -= 100
+            if '0111' == leftdiag_str: score -= 100
+
+            if '1110' == rightdiag_str: score -= 100
+            if '1101' == rightdiag_str: score -= 100
+            if '1011' == rightdiag_str: score -= 100
+            if '0111' == rightdiag_str: score -= 100
+
+            if '2220' == leftdiag_str: score += 100
+            if '2202' == leftdiag_str: score += 100
+            if '2022' == leftdiag_str: score += 100
+            if '0222' == leftdiag_str: score += 100
+
+            if '2220' == rightdiag_str: score += 100
+            if '2202' == rightdiag_str: score += 100
+            if '2022' == rightdiag_str: score += 100
+            if '0222' == rightdiag_str: score += 100
+
+    return score
 
 def findBestMove(board: np.ndarray) -> int:
     """returns the current best move
@@ -118,7 +175,9 @@ def findBestMove(board: np.ndarray) -> int:
     copiedBoard = np.copy(board)
     return minimax.minimaxAlgo(copiedBoard, PLAYER_PIECE, COMP_PIECE,
                                 evaluateBoard, playPiece, areMovesLeft, checkWinner, generateMoves,
-                                maxDepth=7, pruning=True, countEvals=False)
+                                maxDepth=6, pruning=True, countEvals=False)
+
+
 
 if __name__ == "__main__":
     board = np.array([
@@ -130,6 +189,8 @@ if __name__ == "__main__":
                 [0,0,0,0,0,0,0],
             ])
     
+    print(checkWinner(board))
+
     current_PLAYER_PIECE = PLAYER_PIECE
     print(board)
     while areMovesLeft(board) and not checkWinner(board):

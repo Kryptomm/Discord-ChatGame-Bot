@@ -6,7 +6,7 @@ from functools import wraps
 
 EVALS = 0
 
-def timing_decorator(func):
+def timeit(func):
     def wrapper(*args, **kwargs):
         start_time = time.time()
         result = func(*args, **kwargs)
@@ -109,7 +109,7 @@ def __minimaxAlgo(board: np.ndarray,
         
         return bestValue, bestMove
 
-@timing_decorator
+@timeit
 def minimaxAlgo(board: np.ndarray,
                 minimizingPiece: int,
                 maximizingPiece: int,
