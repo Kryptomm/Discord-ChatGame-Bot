@@ -63,7 +63,7 @@ def checkWinner(board: np.ndarray) -> int:
     #No winner
     return 0
 
-def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
+def playPiece(board: np.ndarray, piece: int, field: int) -> tuple[bool, tuple[int, int]]:
     """places a piece on the board if possible
 
     Args:
@@ -72,15 +72,15 @@ def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
         field (int): the field the where the piece is placed
 
     Returns:
-        bool: true if the piece is placed or not
+        (bool, (int,int)): true if the piece is placed or not and the coordinates where it was places
     """
     y = field // 3
     x = field % 3
     
-    if board[y][x]: return False
+    if board[y,x]: return False, (-1, -1)
     
-    board[y][x] = piece
-    return True
+    board[y,x] = piece
+    return True, (y,x)
 
 def evaluateBoard(board: np.ndarray) -> int:
     """returns a score for the given board
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     while areMovesLeft(board) and not checkWinner(board):
         if current_PLAYER_PIECE == PLAYER_PIECE:
             target_field = int(input("field: "))
-            while(not playPiece(board, PLAYER_PIECE, target_field)):
+            while(not playPiece(board, PLAYER_PIECE, target_field)[0]):
                 target_field = int(input("NEU field: "))
         else:
             move = findBestMove(board)

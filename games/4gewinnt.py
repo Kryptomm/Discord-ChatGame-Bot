@@ -27,7 +27,7 @@ def generateMoves():
     Yields:
         int: the move
     """    
-    for i in range(7):
+    for i in [1,5,2,3,4,0,6]:
         yield i
 
 def areMovesLeft(board: np.ndarray) -> bool:
@@ -72,9 +72,7 @@ def checkWinner(board: np.ndarray) -> int:
                     and np.flipud(square).diagonal()[0] in [PLAYER_PIECE, COMP_PIECE]):
                 return np.flipud(square).diagonal()[0]
 
-    return 0
-
-def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
+def playPiece(board: np.ndarray, piece: int, field: int) -> tuple[bool, tuple[int, int]]:
     """places a piece on the board if possible
 
     Args:
@@ -83,16 +81,16 @@ def playPiece(board: np.ndarray, piece: int, field: int) -> bool:
         field (int): the field the where the piece is placed
 
     Returns:
-        bool: true if the piece is placed or not
+        bool: true if the piece is placed or not and the coordinates where it was places
     """
     column = board[:,field]
 
     openRow = np.where(column == 0)[0]
-    if len(openRow) == 0: return False
+    if len(openRow) == 0: return False, (-1,-1)
     openRow = max(openRow)
 
     board[openRow,field] = piece
-    return True
+    return True, (openRow, field)
 
 def evaluateBoard(board: np.ndarray) -> int:
     """returns a score for the given board

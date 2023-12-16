@@ -65,12 +65,13 @@ def __minimaxAlgo(board: np.ndarray,
         bestMove = 0
         
         for field in generateMoves():
-            copiedBoard = np.copy(board)
-            if not playPiece(copiedBoard, maximizingPiece, field): continue
+            couldBePlaced, placedCoordinates = playPiece(board, maximizingPiece, field)
+            if not couldBePlaced: continue
             
-            moveValue, _ = __minimaxAlgo(copiedBoard,minimizingPiece, maximizingPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
+            moveValue, _ = __minimaxAlgo(board,minimizingPiece, maximizingPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
                                 depth=depth+1, isMaximizing=False, alpha=alpha, beta=beta, maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)
             
+            board[(placedCoordinates)] = 0
             #max
             if moveValue > bestValue:
                 bestValue = moveValue
@@ -89,12 +90,13 @@ def __minimaxAlgo(board: np.ndarray,
         bestMove = 0
         
         for field in generateMoves():
-            copiedBoard = np.copy(board)
-            if not playPiece(copiedBoard, minimizingPiece, field): continue
+            couldBePlaced, placedCoordinates = playPiece(board, minimizingPiece, field)
+            if not couldBePlaced: continue
             
-            moveValue, _ = __minimaxAlgo(copiedBoard,minimizingPiece, maximizingPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
+            moveValue, _ = __minimaxAlgo(board,minimizingPiece, maximizingPiece, evaluate, playPiece, areMovesLeft, checkWinner, generateMoves,
                                 depth=depth+1, isMaximizing=True, alpha=alpha, beta=beta, maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)
             
+            board[(placedCoordinates)] = 0
             #min
             if moveValue < bestValue:
                 bestValue = moveValue
