@@ -104,8 +104,8 @@ def evaluateBoard(board: np.ndarray) -> int:
         int: the score of the board
     """
     winner = checkWinner(board)
-    if winner == PLAYER_PIECE: return float('-inf')
-    elif winner == COMP_PIECE: return float('inf')
+    if winner == PLAYER_PIECE: return -10000000000
+    elif winner == COMP_PIECE: return 10000000000
     else: return 0
 
 def findBestMove(board: np.ndarray) -> int:
@@ -120,7 +120,7 @@ def findBestMove(board: np.ndarray) -> int:
     copiedBoard = np.copy(board)
     return minimax.minimaxAlgo(copiedBoard, PLAYER_PIECE, COMP_PIECE,
                                 evaluateBoard, playPiece, areMovesLeft, checkWinner, generateMoves,
-                                maxDepth=8, pruning=True, countEvals=True)
+                                maxDepth=7, pruning=True, countEvals=False)
 
 if __name__ == "__main__":
     board = np.array([
@@ -132,8 +132,6 @@ if __name__ == "__main__":
                 [0,0,0,0,0,0,0],
             ])
     
-    findBestMove(board)
-    exit()
     current_PLAYER_PIECE = PLAYER_PIECE
     print(board)
     while areMovesLeft(board) and not checkWinner(board):
