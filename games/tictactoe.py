@@ -1,5 +1,4 @@
 import numpy as np
-import minimax
 
 from game import Game
 
@@ -7,7 +6,7 @@ from game import Game
 class TicTacToe(Game):
     def __init__(self, playerOneID: int, playerTwoID:int = 0):
         board = np.zeros((3,3))
-        
+
         super().__init__(board, playerOneID, playerTwoID=playerTwoID)
 
     def generateMoves(self):
