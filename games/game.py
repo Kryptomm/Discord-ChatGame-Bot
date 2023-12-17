@@ -40,7 +40,7 @@ class Game():
 
         self.__EVALS = 0
 
-    def makeTurn(self, player: int, field: int) -> bool:
+    def makeTurn(self, player: int, field: int) -> int:
         if player not in [self.playerOnePiece, self.playerTwoPiece]:
             raise NotPartOfGame()
         
@@ -49,8 +49,10 @@ class Game():
         
         if player == self.playerOneID:
             self.playPiece(self.playerOnePiece, field)
+            self.currentPlayer = self.playerTwoID
         elif player == self.playerTwoID:
             self.playPiece(self.playerTwoPiece, field)
+            self.currentPlayer = self.playerOneID
         
         winner = self.checkWinner()
         if winner > 0 or not self.areMovesLeft():
@@ -59,6 +61,14 @@ class Game():
         if self.isAgainstAI:
             move = self.findBestMove()
             self.playPiece(self.playerTwoPiece, move)
+            self.currentPlayer = self.playerOneID
+
+            winner = self.checkWinner()
+            if winner > 0 or not self.areMovesLeft():
+                return winner
+
+
+        return -1
         
     def __minimaxAlgo(self,
                 depth: int = 0,
@@ -123,7 +133,8 @@ class Game():
     
 
     def minimax(self, maxDepth: int = 10, pruning: bool = True, countEvals: bool = False):
-        move = self.__minimaxAlgo(maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)[1]
+        score, move = self.__minimaxAlgo(maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)
+        print(f"{score=} {move=}")
         
         if countEvals:
             print(f"It took {self.__EVALS} evaulations to compute")

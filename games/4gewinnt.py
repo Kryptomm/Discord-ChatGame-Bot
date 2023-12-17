@@ -6,7 +6,7 @@ from game import Game
 
 class connect4(Game):
     def __init__(self, playerOneID: int, playerTwoID:int = 0):
-        board = np.zeros((6,7))
+        board = np.zeros((6,7), dtype=int)
         
         super().__init__(board, playerOneID, playerTwoID=playerTwoID)
 
@@ -76,7 +76,7 @@ class connect4(Game):
             if '2220' in row_str: score += 100
 
         #Columns
-        for column in range(6):
+        for column in range(7):
             column_str = ''.join(map(str, self.board[:,column]))
             if '0111' in column_str: score -= 100
             if '0222' in column_str: score += 100
@@ -112,8 +112,6 @@ class connect4(Game):
     
     def findBestMove(self) -> int:
         return self.minimax(maxDepth=6)
-
-
 
 
 if __name__ == "__main__":

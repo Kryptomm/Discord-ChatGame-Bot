@@ -5,7 +5,7 @@ from game import Game
 
 class TicTacToe(Game):
     def __init__(self, playerOneID: int, playerTwoID:int = 0):
-        board = np.zeros((3,3))
+        board = np.zeros((3,3), dtype=int)
 
         super().__init__(board, playerOneID, playerTwoID=playerTwoID)
 
@@ -61,13 +61,4 @@ if __name__ == "__main__":
     print(game.board)
 
     game.makeTurn(1,8)
-    print(game.board)
-
-    game.makeTurn(1,7)
-    print(game.board)
-
-    game.makeTurn(1,2)
-    print(game.board)
-
-    game.makeTurn(1,3)
     print(game.board)
