@@ -141,3 +141,15 @@ class Game():
             EVALS = 0
 
         return move
+    
+    def __repr__(self) -> str:
+        board_str = ""
+        color_codes = [37,32,31]
+        for y in range(len(self.board)):
+            for x in range(len(self.board[y])):
+                elem = self.board[y,x]
+                board_str +=  f"\033[{color_codes[elem]}m{elem}\033[0m "
+            
+            board_str += "\n"
+        
+        return board_str
