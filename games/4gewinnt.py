@@ -63,10 +63,10 @@ class connect4(Game):
         self.board[openRow,field] = piece
         return True, (openRow, field)
     
-    def evaluate(self) -> int:
+    def evaluate(self, **kwargs) -> int:
         winner = self.checkWinner()
-        if winner == self.playerOnePiece: return -10000000000
-        elif winner == self.playerTwoPiece: return 10000000000
+        if winner == self.playerOnePiece: return (100 - kwargs["depth"]) * -100000000 #Zögert Lose raus damit Spieler noch Fehler machen kann
+        elif winner == self.playerTwoPiece: return (100 - kwargs["depth"]) * 100000000 #Nimmt den schnellstmöglichen Win (ohne Diff für trollen von Gegner)
 
         score = 0
 

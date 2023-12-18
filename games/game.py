@@ -90,7 +90,7 @@ class Game():
         if depth == maxDepth or (not self.areMovesLeft()) or self.checkWinner():
             if countEvals:
                 self.__EVALS += 1
-            return self.evaluate(), None
+            return self.evaluate(depth=depth), None
         
         if isMaximizing:
             bestValue = float('-inf')
