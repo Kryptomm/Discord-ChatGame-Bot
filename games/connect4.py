@@ -123,7 +123,28 @@ class connect4(Game):
         return score
     
     def findBestMove(self) -> int:
-        return self.minimax(maxDepth=7, countEvals=True)
+        playableRows = self.countPlayableRows()
+        #depth dependent from free columns to play
+        depth = {
+            0: 1000,
+            1: 1000,
+            2: 19,
+            3: 12,
+            4: 9,
+            5: 8,
+            6: 8,
+            7: 7
+        }[playableRows]
+        
+        print(f"{depth=}")
+        return self.minimax(maxDepth=depth, countEvals=True)
+    
+    def countPlayableRows(self) -> int:
+        playableRows = 0
+        for column in range(7):
+            column_str = ''.join(map(str, self.board[:,column]))
+            if '0' in column_str: playableRows += 1
+        return playableRows
 
 
 if __name__ == "__main__":
