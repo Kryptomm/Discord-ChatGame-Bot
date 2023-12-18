@@ -147,7 +147,6 @@ class Game():
             
             return bestValue, bestMove
     
-    @timeit
     def minimax(self, maxDepth: int = 10, pruning: bool = True, countEvals: bool = False):
         score, move = self.__minimaxAlgo(maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)
 

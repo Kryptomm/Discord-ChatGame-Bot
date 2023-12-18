@@ -1,8 +1,19 @@
 import numpy as np
 
 from typing import Generator
-from game import Game
+from game import Game, timeit
 
+PREDEFINED_PLAYS = None
+
+@timeit
+def loadData():
+    global PREDEFINED_PLAYS
+    data_dict = {}
+    with open('data/connect4.txt', 'r') as file:
+        for line in file:
+            key, value = line.strip().split(': ')
+            data_dict[key] = int(value)
+    PREDEFINED_PLAYS = data_dict
 
 class connect4(Game):
     def __init__(self, playerOneID: int, playerTwoID:int = 0, firstPlayerStarts:bool = True):
@@ -122,7 +133,12 @@ class connect4(Game):
 
         return score
     
+    @timeit
     def findBestMove(self) -> int:
+        flatBoard = self.boardToFlatString()
+        if flatBoard in PREDEFINED_PLAYS:
+            return PREDEFINED_PLAYS[flatBoard], 0
+
         playableRows = self.countPlayableRows()
         #depth dependent from free columns to play
         depth = {
@@ -135,8 +151,7 @@ class connect4(Game):
             6: 8,
             7: 7
         }[playableRows]
-        
-        print(f"{depth=}")
+
         return self.minimax(maxDepth=depth, countEvals=True)
     
     def countPlayableRows(self) -> int:
@@ -145,10 +160,14 @@ class connect4(Game):
             column_str = ''.join(map(str, self.board[:,column]))
             if '0' in column_str: playableRows += 1
         return playableRows
+    
+    def boardToFlatString(self) -> str:
+        return ''.join(map(str, self.board.flatten()))
 
+loadData()
 
 if __name__ == "__main__":
-    game = connect4(1,firstPlayerStarts=True)
+    game = connect4(1,firstPlayerStarts=False)
 
     print(game)
     while game.makeTurn(1, int(input("Field: "))-1, printAIMove=True, offset=1) == -1:
