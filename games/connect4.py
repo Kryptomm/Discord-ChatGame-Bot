@@ -167,10 +167,22 @@ class connect4(Game):
 loadData()
 
 if __name__ == "__main__":
-    game = connect4(1,firstPlayerStarts=False)
-
-    print(game)
-    while game.makeTurn(1, int(input("Field: "))-1, printAIMove=True, offset=1) == -1:
+    selfPlaying = False
+    if selfPlaying:
+        game = connect4(1,playerTwoID=2,firstPlayerStarts=False)
         print(game)
-    print(game)
-    print(game.checkWinner())
+        print(game.boardToFlatString())
+
+        game.makeTurn(2, 3)
+        game.makeTurn(1, 3)
+        print(game)
+        print(game.boardToFlatString())
+
+    else:
+        from random import random
+        game = connect4(1,firstPlayerStarts=(random() <= 0.5))
+        print(game)
+        while game.makeTurn(1, int(input("Field: "))-1, printAIMove=True, offset=1) == -1:
+            print(game)
+        print(game)
+        print(game.checkWinner())

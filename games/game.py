@@ -40,11 +40,12 @@ class Game():
         self.currentPlayer = playerOneID
         if not firstPlayerStarts:
             self.currentPlayer = playerTwoID
-            move, score = self.findBestMove()
-            self.playPiece(self.playerTwoPiece, move)
-            self.currentPlayer = self.playerOneID
+            if self.isAgainstAI:
+                move, score = self.findBestMove()
+                self.playPiece(self.playerTwoPiece, move)
+                self.currentPlayer = self.playerOneID
 
-            self.__lastPlayedField = move
+                self.__lastPlayedField = move
 
         
 
