@@ -26,7 +26,7 @@ class NotPartOfGame(Exception):
 
 
 class Game():
-    def __init__(self, board: np.ndarray, playerOneID: int, playerTwoID:int = 0):
+    def __init__(self, board: np.ndarray, playerOneID: int, playerTwoID: int = 0):
         self.board = board
         self.playerOneID = playerOneID
         self.playerTwoID = playerTwoID
@@ -40,7 +40,7 @@ class Game():
 
         self.__EVALS = 0
 
-    def makeTurn(self, player: int, field: int) -> int:
+    def makeTurn(self, player: int, field: int, printAIMove: bool = True) -> int:
         if player not in [self.playerOnePiece, self.playerTwoPiece]:
             raise NotPartOfGame()
         
@@ -50,9 +50,12 @@ class Game():
         if player == self.playerOneID:
             self.playPiece(self.playerOnePiece, field)
             self.currentPlayer = self.playerTwoID
+            
         elif player == self.playerTwoID:
             self.playPiece(self.playerTwoPiece, field)
             self.currentPlayer = self.playerOneID
+
+        self.__lastPlayedField = field
         
         winner = self.checkWinner()
         if winner > 0 or not self.areMovesLeft():
@@ -63,10 +66,14 @@ class Game():
             self.playPiece(self.playerTwoPiece, move)
             self.currentPlayer = self.playerOneID
 
+            self.__lastPlayedField = move
+
+            if printAIMove:
+                print(f"{move=}")
+
             winner = self.checkWinner()
             if winner > 0 or not self.areMovesLeft():
                 return winner
-
 
         return -1
         
@@ -131,11 +138,10 @@ class Game():
             
             return bestValue, bestMove
     
-
+    @timeit
     def minimax(self, maxDepth: int = 10, pruning: bool = True, countEvals: bool = False):
         score, move = self.__minimaxAlgo(maxDepth=maxDepth, pruning=pruning, countEvals=countEvals)
-        print(f"{score=} {move=}")
-        
+
         if countEvals:
             print(f"It took {self.__EVALS} evaulations to compute")
             EVALS = 0

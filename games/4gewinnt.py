@@ -6,13 +6,25 @@ from game import Game
 
 class connect4(Game):
     def __init__(self, playerOneID: int, playerTwoID:int = 0):
-        board = np.zeros((6,7), dtype=int)
-        
+        self.__lastPlayedField = 3
+
+        board = np.zeros((6,7), dtype=int)        
         super().__init__(board, playerOneID, playerTwoID=playerTwoID)
 
     def generateMoves(self) -> Generator[int, None, None]:
-        for i in [1,5,2,3,4,0,6]:
-            yield i
+        lower = self.__lastPlayedField
+        higher = self.__lastPlayedField
+
+        yield self.__lastPlayedField
+        while higher < 6 or lower > 0:
+            if higher < 6:
+                higher += 1
+                yield higher
+                
+            if lower > 0:
+                lower -= 1
+                yield lower
+
 
     def areMovesLeft(self) -> bool:
         return np.any(self.board == 0)
@@ -23,7 +35,7 @@ class connect4(Game):
             if '1111' in row_str: return self.playerOnePiece
             elif '2222' in row_str: return self.playerTwoPiece
 
-        for column in range(6):
+        for column in range(7):
             column_str = ''.join(map(str, self.board[:,column]))
             if '1111' in column_str: return self.playerOnePiece
             elif '2222' in column_str: return self.playerTwoPiece
@@ -111,14 +123,14 @@ class connect4(Game):
         return score
     
     def findBestMove(self) -> int:
-        return self.minimax(maxDepth=6)
+        return self.minimax(maxDepth=7, countEvals=True)
 
 
 if __name__ == "__main__":
     game = connect4(1)
 
     print(game)
-    while game.makeTurn(1, int(input("Field: "))) == -1:
+    while game.makeTurn(1, int(input("Field: ")), printAIMove=True) == -1:
         print(game)
     print(game)
     print(game.checkWinner())
