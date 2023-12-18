@@ -6,8 +6,9 @@ from game import Game, timeit
 PREDEFINED_PLAYS = None
 
 class connect4(Game):
-    def __init__(self, playerOneID: int, playerTwoID:int = 0, firstPlayerStarts:bool = True):
+    def __init__(self, playerOneID: int, playerTwoID:int = 0, firstPlayerStarts:bool = True, trolling:bool = False):
         self.__lastPlayedField = 3
+        self.__isTroll = trolling
 
         board = np.zeros((6,7), dtype=int)        
         super().__init__(board, playerOneID, playerTwoID=playerTwoID, firstPlayerStarts=firstPlayerStarts)
@@ -66,7 +67,8 @@ class connect4(Game):
     def evaluate(self, **kwargs) -> int:
         winner = self.checkWinner()
         if winner == self.playerOnePiece: return (100 - kwargs["depth"]) * -100000000 #Zögert Lose raus damit Spieler noch Fehler machen kann
-        elif winner == self.playerTwoPiece: return kwargs["depth"] * 100000000 #Nimmt den schnellstmöglichen Win (ohne Diff für trollen von Gegner)
+        elif winner == self.playerTwoPiece and self.__isTroll: return kwargs["depth"] * 100000000
+        elif winner == self.playerTwoPiece and not self.__isTroll: return (100 - kwargs["depth"]) * 100000000
 
         score = 0
 
@@ -124,9 +126,15 @@ class connect4(Game):
     
     @timeit
     def findBestMove(self) -> int:
-        flatBoard = self.boardToFlatString()
-        if flatBoard in PREDEFINED_PLAYS:
-            return PREDEFINED_PLAYS[flatBoard], 0
+        #Gucken ob der Play schon einmal berechnet wurde
+        dataKey = self.getDataKey()
+        if dataKey in PREDEFINED_PLAYS:
+            return PREDEFINED_PLAYS[dataKey], 0
+
+        #Gibt es eine Reihe die auf jedenfall verhindert werden muss?
+        necessaryPlacement = self.checkForNecessaryPlacement()
+        if necessaryPlacement >= 0:
+            return necessaryPlacement, 0
 
         playableRows = self.countPlayableRows()
         #depth dependent from free columns to play
@@ -143,9 +151,10 @@ class connect4(Game):
 
         move, score = self.minimax(maxDepth=depth, countEvals=True)
 
+        #Wenn winning move, direkt spielen
         alreadyWon=score>=100000000
         if alreadyWon:
-            self.writeData(self.boardToFlatString(), move)
+            self.writeData(dataKey, move)
 
         return move, score
     
@@ -156,6 +165,28 @@ class connect4(Game):
             if '0' in column_str: playableRows += 1
         return playableRows
     
+    def checkForNecessaryPlacement(self) -> int:
+        for field in self.generateMoves():
+            couldBePlaced, placedCoordinates = self.playPiece(self.playerOnePiece, field)
+            if not couldBePlaced: continue
+
+            if self.checkWinner() == self.playerOnePiece:
+                self.board[(placedCoordinates)] = 0
+                return field
+
+            self.board[(placedCoordinates)] = 0
+        
+        return -1
+
+    def getDataKey(self) -> str:
+        global PREDEFINED_PLAYS
+        key = self.boardToFlatString()
+        if self.__isTroll:
+            key += "t"
+        else:
+            key += "n"
+        return key
+
     @timeit
     @staticmethod
     def loadData():
@@ -173,6 +204,7 @@ class connect4(Game):
     def writeData(key, value):
         global PREDEFINED_PLAYS
         if key in PREDEFINED_PLAYS: return
+        PREDEFINED_PLAYS[key] = value
         with open('data/connect4.txt', 'a') as file:
             file.write(f"{key}: {value}\n")
 
@@ -192,9 +224,9 @@ if __name__ == "__main__":
 
     else:
         from random import random
-        game = connect4(1,firstPlayerStarts=(random() <= 0.5))
+        game = connect4(1,firstPlayerStarts=(random() <= 0.5),trolling=False)
         print(game)
         while game.makeTurn(1, int(input("Field: "))-1, printAIMove=True, offset=1) == -1:
             print(game)
         print(game)
-        print(game.checkWinner())
+        print(f"winner={game.checkWinner()}")
