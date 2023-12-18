@@ -130,7 +130,7 @@ if __name__ == "__main__":
     game = connect4(1)
 
     print(game)
-    while game.makeTurn(1, int(input("Field: ")), printAIMove=True) == -1:
+    while game.makeTurn(1, int(input("Field: "))-1, printAIMove=True, offset=1) == -1:
         print(game)
     print(game)
     print(game.checkWinner())

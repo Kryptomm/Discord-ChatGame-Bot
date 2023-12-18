@@ -40,7 +40,7 @@ class Game():
 
         self.__EVALS = 0
 
-    def makeTurn(self, player: int, field: int, printAIMove: bool = True) -> int:
+    def makeTurn(self, player: int, field: int, printAIMove: bool = True, offset: int = 0) -> int:
         if player not in [self.playerOnePiece, self.playerTwoPiece]:
             raise NotPartOfGame()
         
@@ -69,7 +69,8 @@ class Game():
             self.__lastPlayedField = move
 
             if printAIMove:
-                print(f"{move=}")
+                AIMove = move + offset
+                print(f"{AIMove=}")
 
             winner = self.checkWinner()
             if winner > 0 or not self.areMovesLeft():
@@ -148,13 +149,19 @@ class Game():
 
         return move
     
+    
+
     def __repr__(self) -> str:
-        board_str = ""
+        board_str = " "
         color_codes = [37,32,31]
+        elements = ["🟪","🟩","🟥"]
+        for i in range(len(self.board[0])):
+            board_str += str(i+1) + "  "
+        board_str += "\n"
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 elem = self.board[y,x]
-                board_str +=  f"\033[{color_codes[elem]}m{elem}\033[0m "
+                board_str +=  f"\033[{color_codes[elem]}m{elements[elem]}\033[0m"
             
             board_str += "\n"
         
