@@ -62,7 +62,7 @@ class Game():
             return winner
 
         if self.isAgainstAI:
-            move = self.findBestMove()
+            move, score = self.findBestMove()
             self.playPiece(self.playerTwoPiece, move)
             self.currentPlayer = self.playerOneID
 
@@ -70,7 +70,7 @@ class Game():
 
             if printAIMove:
                 AIMove = move + offset
-                print(f"{AIMove=}")
+                print(f"{AIMove=} {score=} alreadyWon={score>=100000000}")
 
             winner = self.checkWinner()
             if winner > 0 or not self.areMovesLeft():
@@ -147,10 +147,9 @@ class Game():
             print(f"It took {self.__EVALS} evaulations to compute")
             EVALS = 0
 
-        return move
+        return move, score
     
     
-
     def __repr__(self) -> str:
         board_str = " "
         color_codes = [37,32,31]
