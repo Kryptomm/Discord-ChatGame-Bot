@@ -26,19 +26,27 @@ class NotPartOfGame(Exception):
 
 
 class Game():
-    def __init__(self, board: np.ndarray, playerOneID: int, playerTwoID: int = 0):
+    def __init__(self, board: np.ndarray, playerOneID: int, playerTwoID: int = 0, firstPlayerStarts: bool = True):
         self.board = board
         self.playerOneID = playerOneID
         self.playerTwoID = playerTwoID
-
-        self.currentPlayer = playerOneID
 
         self.playerOnePiece = 1
         self.playerTwoPiece = 2
 
         self.isAgainstAI = (playerTwoID == 0)
-
         self.__EVALS = 0
+
+        self.currentPlayer = playerOneID
+        if not firstPlayerStarts:
+            self.currentPlayer = playerTwoID
+            move, score = self.findBestMove()
+            self.playPiece(self.playerTwoPiece, move)
+            self.currentPlayer = self.playerOneID
+
+            self.__lastPlayedField = move
+
+        
 
     def makeTurn(self, player: int, field: int, printAIMove: bool = True, offset: int = 0) -> int:
         if player not in [self.playerOnePiece, self.playerTwoPiece]:

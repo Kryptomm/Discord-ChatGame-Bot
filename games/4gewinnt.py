@@ -5,11 +5,11 @@ from game import Game
 
 
 class connect4(Game):
-    def __init__(self, playerOneID: int, playerTwoID:int = 0):
+    def __init__(self, playerOneID: int, playerTwoID:int = 0, firstPlayerStarts:bool = True):
         self.__lastPlayedField = 3
 
         board = np.zeros((6,7), dtype=int)        
-        super().__init__(board, playerOneID, playerTwoID=playerTwoID)
+        super().__init__(board, playerOneID, playerTwoID=playerTwoID, firstPlayerStarts=firstPlayerStarts)
 
     def generateMoves(self) -> Generator[int, None, None]:
         lower = self.__lastPlayedField
@@ -127,7 +127,7 @@ class connect4(Game):
 
 
 if __name__ == "__main__":
-    game = connect4(1)
+    game = connect4(1,firstPlayerStarts=False)
 
     print(game)
     while game.makeTurn(1, int(input("Field: "))-1, printAIMove=True, offset=1) == -1:
