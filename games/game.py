@@ -162,9 +162,11 @@ class Game():
         board_str = " "
         color_codes = [37,32,31]
         elements = ["🟪","🟩","🟥"]
+
         for i in range(len(self.board[0])):
             board_str += str(i+1) + "  "
         board_str += "\n"
+
         for y in range(len(self.board)):
             for x in range(len(self.board[y])):
                 elem = self.board[y,x]

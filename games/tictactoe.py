@@ -4,10 +4,10 @@ from game import Game
 
 
 class TicTacToe(Game):
-    def __init__(self, playerOneID: int, playerTwoID:int = 0):
+    def __init__(self, playerOneID: int, playerTwoID:int = 0, firstPlayerStarts:bool = True):
         board = np.zeros((3,3), dtype=int)
 
-        super().__init__(board, playerOneID, playerTwoID=playerTwoID)
+        super().__init__(board, playerOneID, playerTwoID=playerTwoID, firstPlayerStarts=firstPlayerStarts)
 
     def generateMoves(self):
         for i in range(9):
@@ -43,7 +43,7 @@ class TicTacToe(Game):
         self.board[y,x] = piece
         return True, (y,x)
     
-    def evaluate(self) -> int:
+    def evaluate(self, **kwargs) -> int:
         winner = self.checkWinner()
         if winner == self.playerOnePiece: return -1
         elif winner == self.playerTwoPiece: return 1
@@ -55,10 +55,10 @@ class TicTacToe(Game):
 
 
 if __name__ == "__main__":
-    game = TicTacToe(1,0)
-    
-    game.makeTurn(1,0)
-    print(game.board)
+    game = TicTacToe(1,firstPlayerStarts=True)
 
-    game.makeTurn(1,8)
-    print(game.board)
+    print(game)
+    while game.makeTurn(1, int(input("Field: "))-1, printAIMove=True, offset=1) == -1:
+        print(game)
+    print(game)
+    print(game.checkWinner())

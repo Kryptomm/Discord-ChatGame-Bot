@@ -127,7 +127,7 @@ class connect4(Game):
 
 
 if __name__ == "__main__":
-    game = connect4(1,firstPlayerStarts=False)
+    game = connect4(1,firstPlayerStarts=True)
 
     print(game)
     while game.makeTurn(1, int(input("Field: "))-1, printAIMove=True, offset=1) == -1:
