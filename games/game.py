@@ -48,7 +48,6 @@ class Game():
                 self.__lastPlayedField = move
 
         
-
     def makeTurn(self, player: int, field: int, printAIMove: bool = True, offset: int = 0) -> int:
         if player not in [self.playerOnePiece, self.playerTwoPiece]:
             raise NotPartOfGame()
@@ -76,10 +75,11 @@ class Game():
             self.currentPlayer = self.playerOneID
 
             self.__lastPlayedField = move
+            alreadyWon=score>=100000000
 
             if printAIMove:
                 AIMove = move + offset
-                print(f"{AIMove=} {score=} alreadyWon={score>=100000000}")
+                print(f"{AIMove=} {score=} {alreadyWon=}")
 
             winner = self.checkWinner()
             if winner > 0 or not self.areMovesLeft():
@@ -157,7 +157,9 @@ class Game():
 
         return move, score
     
-    
+    def boardToFlatString(self) -> str:
+        return ''.join(map(str, self.board.flatten()))
+
     def __repr__(self) -> str:
         board_str = " "
         color_codes = [37,32,31]

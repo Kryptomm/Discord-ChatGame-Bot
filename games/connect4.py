@@ -5,16 +5,6 @@ from game import Game, timeit
 
 PREDEFINED_PLAYS = None
 
-@timeit
-def loadData():
-    global PREDEFINED_PLAYS
-    data_dict = {}
-    with open('data/connect4.txt', 'r') as file:
-        for line in file:
-            key, value = line.strip().split(': ')
-            data_dict[key] = int(value)
-    PREDEFINED_PLAYS = data_dict
-
 class connect4(Game):
     def __init__(self, playerOneID: int, playerTwoID:int = 0, firstPlayerStarts:bool = True):
         self.__lastPlayedField = 3
@@ -24,9 +14,9 @@ class connect4(Game):
 
     def generateMoves(self) -> Generator[int, None, None]:
         lower = self.__lastPlayedField
-        higher = self.__lastPlayedField
+        higher = lower
 
-        yield self.__lastPlayedField
+        yield lower
         while higher < 6 or lower > 0:
             if higher < 6:
                 higher += 1
@@ -35,7 +25,6 @@ class connect4(Game):
             if lower > 0:
                 lower -= 1
                 yield lower
-
 
     def areMovesLeft(self) -> bool:
         return np.any(self.board == 0)
@@ -152,7 +141,13 @@ class connect4(Game):
             7: 7
         }[playableRows]
 
-        return self.minimax(maxDepth=depth, countEvals=True)
+        move, score = self.minimax(maxDepth=depth, countEvals=True)
+
+        alreadyWon=score>=100000000
+        if alreadyWon:
+            self.writeData(self.boardToFlatString(), move)
+
+        return move, score
     
     def countPlayableRows(self) -> int:
         playableRows = 0
@@ -161,10 +156,27 @@ class connect4(Game):
             if '0' in column_str: playableRows += 1
         return playableRows
     
-    def boardToFlatString(self) -> str:
-        return ''.join(map(str, self.board.flatten()))
+    @timeit
+    @staticmethod
+    def loadData():
+        global PREDEFINED_PLAYS
+        data_dict = {}
+        with open('data/connect4.txt', 'r') as file:
+            for line in file:
+                data = line.strip().split(': ')
+                if len(data) == 2:
+                    key, value = data
+                    data_dict[key] = int(value)
+        PREDEFINED_PLAYS = data_dict
 
-loadData()
+    @staticmethod
+    def writeData(key, value):
+        global PREDEFINED_PLAYS
+        if key in PREDEFINED_PLAYS: return
+        with open('data/connect4.txt', 'a') as file:
+            file.write(f"{key}: {value}\n")
+
+connect4.loadData()
 
 if __name__ == "__main__":
     selfPlaying = False
